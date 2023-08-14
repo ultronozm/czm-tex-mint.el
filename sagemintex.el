@@ -1,8 +1,9 @@
-;;; sagemintex.el --- Execute minted sage blocks in tex buffers  -*- lexical-binding: t; -*-
+;;; sagemintex.el --- executable minted sage blocks in tex buffers  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Paul D. Nelson
 
 ;; Author: Paul D. Nelson <nelson.paul.david@gmail.com>
+;; Version: 0.1
 ;; Keywords: tex, tools, convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -20,13 +21,16 @@
 
 ;;; Commentary:
 
-;; This package lets you write and execute minted sage blocks in LaTeX
-;; buffers.  It's a bit like what happens with org mode source blocks.
-;; Inspired by the `xenops' package.
+;; This package makes it easy to work with minted sage blocks in LaTeX
+;; documents.  You can write them and execute them.  You'll have a
+;; good time.  Trust me.
 
 ;;; Code:
 
 (require 'mmm-auto)
+(require 'mmm-region)
+(require 'sage-shell-mode)
+(require 'preview)
 (setq mmm-global-mode 'maybe)
 
 ;; Define latex-minted-sage class
@@ -59,23 +63,10 @@
   :type 'boolean
   :group 'sagemintex)
 
-(cl-defun sagemintex-evaluate (&key latex)
-  "Evaluate the current minted sage code block.
-This function takes an optional argument 'latex' which, if non-nil,
-causes the result to be split into lines and inserted into equation*
-blocks."
-  (interactive)
-  (when-let ((ovl (mmm-overlay-at (point))))
-    (let ((code
-	   (buffer-substring-no-properties (overlay-start ovl) (overlay-end
-								ovl))))
-      (if latex
-	  (sagemintex-evaluate-latex)
-	(sagemintex-evaluate-no-latex)))))
-
 (defmacro sagemintex-with-auto-fold (&rest body)
-  "If `sagemintex-auto-fold-results' is non-nil, fold the region
-created by the BODY expressions."
+  "Conditionally fold the region created by BODY expressions.
+If `sagemintex-auto-fold-results' is non-nil, then fold the
+region created by the expressions in BODY."
   `(let ((pos (point)))
      ,@body
      (when sagemintex-auto-fold-results
@@ -83,29 +74,25 @@ created by the BODY expressions."
 
 (cl-defun sagemintex-evaluate (&key latex)
   "Evaluate the current minted sage code block.
-This function takes an optional argument 'latex' which, if non-nil,
-causes the result to be split into lines and inserted into equation*
-blocks."
+If optional argument LATEX is non-nil, then split the result into
+lines and enclose with equation* blocks."
   (interactive)
   (when-let ((ovl (mmm-overlay-at (point))))
-    (buffer-substring-no-properties (overlay-start ovl) (overlay-end ovl))
     (let* ((code
-	    (buffer-substring-no-properties (overlay-start ovl) (overlay-end
-								 ovl)))
+	    (buffer-substring-no-properties
+             (overlay-start ovl) (overlay-end ovl)))
 	   (wrapped-code
 	    (if (not latex) code
-	      (let*
-		  (
-		   (code-lines (split-string code "\n"))
-		   (wrapped-code-lines
-		    (mapcar (lambda (line)
-			      (if (and
-				   (> (length line) 0)
-				   (not (string-match-p "^load*" line))
-				   (not (string-match-p "^[^=]*=\\([^=]\\|$\\)" line)))
-				  (concat "latex(" line ")")
-				line))
-			    code-lines)))
+	      (let* ((code-lines (split-string code "\n"))
+		     (wrapped-code-lines
+		      (mapcar (lambda (line)
+			        (if (and
+				     (> (length line) 0)
+				     (not (string-match-p "^load*" line))
+				     (not (string-match-p "^[^=]*=\\([^=]\\|$\\)" line)))
+				    (concat "latex(" line ")")
+				  line))
+			      code-lines)))
 		(string-join wrapped-code-lines "\n"))))
 	   (sage-buffer
 	    (or
@@ -160,6 +147,7 @@ blocks."
 
 
 (defun sagemintex-evaluate-latex ()
+  "Evaluate current block.  Wrap result in equation* blocks."
   (interactive)
   (sagemintex-evaluate :latex t)
   )
@@ -175,10 +163,12 @@ blocks."
 
 
 (defun sagemintex-enable ()
+  "Enable `sagemintex-mode' in the current buffer."
   (setq-local indent-line-function #'my-indent-line-narrowed)
   (sagemintex-mode 1))
 
 (defun sagemintex-disable ()
+  "Disable `sagemintex-mode' in the current buffer."
   (sagemintex-mode 0))
 
 (defun my-indent-line-narrowed ()
@@ -211,4 +201,3 @@ appease modes which rely on constructs like (point-min) to indent."
 
 (provide 'sagemintex)
 ;;; sagemintex.el ends here
-
