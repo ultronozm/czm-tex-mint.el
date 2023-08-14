@@ -1,9 +1,11 @@
-;;; sagemintex.el --- executable minted sage blocks in tex buffers  -*- lexical-binding: t; -*-
+;;; sagemintex.el --- Execute minted sage blocks in tex buffers -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2023  Paul D. Nelson
 
 ;; Author: Paul D. Nelson <nelson.paul.david@gmail.com>
 ;; Version: 0.1
+;; URL: https://github.com/ultronozm/sagemintex.el
+;; Package-Requires: ((emacs "26.1"))
 ;; Keywords: tex, tools, convenience
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -107,8 +109,7 @@ lines and enclose with equation* blocks."
 		wrapped-code
 		"\n"
 		"result:\n"
-		result
-		))
+		result))
       (save-excursion
 	(goto-char (overlay-end ovl))
 	(end-of-line)
@@ -149,8 +150,7 @@ lines and enclose with equation* blocks."
 (defun sagemintex-evaluate-latex ()
   "Evaluate current block.  Wrap result in equation* blocks."
   (interactive)
-  (sagemintex-evaluate :latex t)
-  )
+  (sagemintex-evaluate :latex t))
 
 (defvar sagemintex-mode-map (make-sparse-keymap)
   "Keymap for `sagemintex-mode'.")
@@ -164,14 +164,14 @@ lines and enclose with equation* blocks."
 
 (defun sagemintex-enable ()
   "Enable `sagemintex-mode' in the current buffer."
-  (setq-local indent-line-function #'my-indent-line-narrowed)
+  (setq-local indent-line-function #'sagemintex--indent-line-narrowed)
   (sagemintex-mode 1))
 
 (defun sagemintex-disable ()
   "Disable `sagemintex-mode' in the current buffer."
   (sagemintex-mode 0))
 
-(defun my-indent-line-narrowed ()
+(defun sagemintex--indent-line-narrowed ()
   "An indent function which works on some modes where `mmm-indent-line' doesn't.
 Works like `mmm-indent-line', but narrows the buffer before indenting to
 appease modes which rely on constructs like (point-min) to indent."
