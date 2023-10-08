@@ -1,0 +1,79 @@
+#+title: czm-tex-mint.el: Evaluate SAGE code on parts of a TeX buffer
+#+author: Paul Nelson
+
+* Overview
+This package provides commands for executing minted SAGE blocks in a TeX buffer and displaying the results in either a =verbatim= or =align*= block.  This is very similar to what one can do in org-mode using [[https://orgmode.org/manual/Working-with-Source-Code.html][source blocks]], [[https://orgmode.org/worg/org-contrib/babel/intro.html][babel]] and [[https://github.com/sagemath/ob-sagemath][ob-sagemath]], but the present package works directly in a TeX buffer, which I find convenient.  I first saw such functionality in the package [[https://github.com/dandavison/xenops][xenops]].  This package provides a variant of a subset of that functionality, as a standalone package, tailored to my needs, e.g., with SAGE rather than Python.
+
+* Configuration
+This package requires [[https://github.com/sagemath/ob-sagemath][ob-sagemath]], [[https://github.com/sagemath/sage-shell-mode][sage-shell-mode]], [[https://www.gnu.org/software/auctex/manual/auctex/Installation.html#Installation][AUCTeX]] and [[https://github.com/dgutov/mmm-mode][mmm-mode]], so install those first.
+
+Download this repository, install using =M-x package-install-file= (or package-vc-install, straight, elpaca, ...), and add something like the following to your [[https://www.emacswiki.org/emacs/InitFile][init file]]:
+#+begin_src elisp
+(use-package mmm-mode
+  :custom
+  (mmm-global-mode 'maybe)
+  :config
+  (face-spec-set 'mmm-default-submode-face
+               '((((background light)) (:background "#ddffff"))
+                 (((background dark)) (:background "#004444")))
+               'face-defface-spec))
+
+(use-package czm-tex-mint
+  :after mmm-mode
+  :demand t
+  :custom
+  (LaTeX-command "latex -shell-escape")
+  :config
+  (czm-tex-mint--initialize)
+  :bind
+  (:map czm-tex-mint--mode-map
+	("C-c C-c" . czm-tex-mint-evaluate)
+	("C-c C-l" . czm-tex-mint-evaluate-latex))
+  :hook
+  (mmm-sage-shell:sage-mode-enter . czm-tex-mint--enable)
+  (mmm-sage-shell:sage-mode-exit . czm-tex-mint--disable))
+#+end_src
+
+Customize the binds to your liking.
+
+Note: the =LaTeX-command= customization is so that you can compile TeX buffers containing =minted= blocks.
+
+* Usage
+In a TeX buffer, activate =mmm-mode=.  Use the command =czm-tex-mint-new-block= to create a new minted sage block.  (You might wish to bind this to a key.  Alternatively, with my [[https://github.com/ultronozm/dynexp.el][dynexp]] package, this step is achieved by typing "bms" and hitting space.)  This yields something like the following:
+#+begin_example
+\begin{minted}{sage}
+
+\end{minted}
+#+end_example
+Type some sage code in the block, and run =czm-tex-mint-evaluate= (=C-c C-c= by default).  This yields:
+#+begin_example
+\begin{minted}{sage}
+a=3
+b=5
+a+b
+a*b
+\end{minted}
+\begin{results*}
+\begin{verbatim}
+8
+15
+\end{verbatim}
+\end{results*}
+#+end_example
+If you instead run =czm-tex-mint-evaluate-latex= (=C-c C-l= by default), then you get:
+#+begin_example
+\begin{minted}{sage}
+a=3
+b=5
+a+b
+a*b
+\end{minted}
+\begin{results*}
+\begin{align*}
+8\\ 
+15
+\end{align*}
+\end{results*}
+#+end_example
+
+If you manually edit things, then you might need to use commands like =mmm-parse-buffer= to make sure that mmm-mode knows where all the source blocks are.
