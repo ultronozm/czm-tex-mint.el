@@ -36,7 +36,7 @@ Download this repository, install using =M-x package-install-file= (or package-v
 
 Customize the binds to your liking.
 
-Note: the =LaTeX-command= customization is so that you can compile TeX buffers containing =minted= blocks.
+Note: the =LaTeX-command= customization is so that you can compile TeX buffers containing =minted= blocks (using =\usepackage{minted}=).
 
 * Usage
 In a TeX buffer, activate =mmm-mode=.  Use the command =czm-tex-mint-new-block= to create a new minted sage block.  (You might wish to bind this to a key.  Alternatively, with my [[https://github.com/ultronozm/dynexp.el][dynexp]] package, this step is achieved by typing "bms" and hitting space.)  This yields something like the following:
