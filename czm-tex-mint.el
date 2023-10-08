@@ -58,7 +58,8 @@ Define the `latex-minted-sage' class and add it to `latex-mode'."
       :save-matches 1
       :insert ((?s sagecode nil @ "\\begin{minted}{sage}" @ "\n" _ "\n" @ "\\end{minted}" @))
       :submode-hook (lambda () (czm-tex-mint--mode 1)))))
-  (mmm-add-mode-ext-class 'latex-mode "\\.tex\\'" 'latex-minted-sage))
+  ;; (mmm-add-mode-ext-class 'latex-mode "\\.tex\\'" 'latex-minted-sage)
+  (mmm-add-mode-ext-class 'latex-mode nil 'latex-minted-sage))
 
 (defun czm-tex-mint--enable ()
   "Enable `czm-tex-mint--mode' in the current buffer."
@@ -200,18 +201,19 @@ result in a verbatim block."
   (interactive)
   (czm-tex-mint-evaluate :latex t))
 
+;;;###autoload
 (defun czm-tex-mint-new-block ()
   "Create a new minted sage block."
   (interactive)
   (insert "\\begin{minted}{sage}\n")
   (save-excursion
     (insert "\n\\end{minted}\n"))
-  (let* ((bounds
-          (save-mark-and-excursion
-            (LaTeX-mark-environment)
-            (region-bounds)))
-         (beg (caar bounds))
-         (end (cdar bounds)))
+  (let* ((beg (save-mark-and-excursion
+                (LaTeX-find-matching-begin)
+                (point)))
+         (end (save-mark-and-excursion
+                (LaTeX-find-matching-end)
+                (line-beginning-position 2))))
     (mmm-parse-region beg end)))
 
 
