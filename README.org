@@ -77,3 +77,6 @@ a*b
 #+end_example
 
 If you manually edit things, then you might need to use commands like =mmm-parse-buffer= to make sure that mmm-mode knows where all the source blocks are.
+
+* Issues
+- If your minted code block begins with a left-bracket "[" and you use [[https://www.gnu.org/software/auctex/manual/auctex/Folding.html ][TeX-fold-mode]], then part of the code might get folded along with the header.  To get around this, you can insert a blank line at the start of your code block.
