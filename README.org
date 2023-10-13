@@ -1,4 +1,4 @@
-#+title: czm-tex-mint.el: Evaluate SAGE code on parts of a TeX buffer
+#+title: czm-tex-mint.el: Evaluate minted sage blocks in TeX buffers
 #+author: Paul Nelson
 
 * Overview
