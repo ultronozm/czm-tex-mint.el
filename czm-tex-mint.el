@@ -63,39 +63,41 @@ Define the `latex-minted-sage' class and add it to `latex-mode'."
 
 (defun czm-tex-mint--enable ()
   "Enable `czm-tex-mint--mode' in the current buffer."
-  ;; (setq-local indent-line-function #'czm-tex-mint--indent-line-narrowed)
+  (setq-local indent-line-function #'czm-tex-mint--indent-line-narrowed)
   (czm-tex-mint--mode 1))
 
 (defun czm-tex-mint--disable ()
   "Disable `czm-tex-mint--mode' in the current buffer."
   (czm-tex-mint--mode 0))
 
-;; (defun czm-tex-mint--indent-line-narrowed ()
-;;   "An indent function which works on some modes where `mmm-indent-line' doesn't.
-;; Works like `mmm-indent-line', but narrows the buffer before indenting to
-;; appease modes which rely on constructs like (point-min) to indent."
-;;   (interactive)
-;;   (save-excursion
-;;     (back-to-indentation)
-;;     (mmm-update-submode-region)
-;;     (let ((indent-function (get
-;;                             (if (and mmm-current-overlay
-;;                                      (> (overlay-end mmm-current-overlay) (point)))
-;;                                 mmm-current-submode
-;;                               mmm-primary-mode)
-;;                             'mmm-indent-line-function)))
-;;       (if mmm-current-overlay
-;;           (save-restriction
-;;             (narrow-to-region (overlay-start mmm-current-overlay)
-;;                               (overlay-end mmm-current-overlay))
-;; 	    (save-excursion
-;; 	      ;; no idea why this works, but it does
-;; 	      ;; (goto-char (point-min))
-;; 	      ;; (newline 1)
-;; 	      ;; (backward-delete-char 1)
-;; 	      )
-;;             (funcall indent-function))
-;;         (funcall indent-function)))))
+(defun czm-tex-mint--indent-line-narrowed ()
+  "An indent function which works on some modes where `mmm-indent-line' doesn't.
+Works like `mmm-indent-line', but narrows the buffer before indenting to
+appease modes which rely on constructs like (point-min) to indent."
+  (interactive)
+  (let ((indent-function
+         (save-excursion
+           (back-to-indentation)
+           (mmm-update-submode-region)
+           (get
+            (if (and mmm-current-overlay
+                     (> (overlay-end mmm-current-overlay)
+                        (point)))
+                mmm-current-submode
+              mmm-primary-mode)
+            'mmm-indent-line-function))))
+    (if mmm-current-overlay
+        (save-restriction
+          (narrow-to-region (overlay-start mmm-current-overlay)
+                            (overlay-end mmm-current-overlay))
+	         (save-excursion
+	           ;; no idea why this works, but it does
+	           ;; (goto-char (point-min))
+	           ;; (newline 1)
+	           ;; (backward-delete-char 1)
+	           )
+          (funcall indent-function))
+      (funcall indent-function))))
 
 (defgroup czm-tex-mint nil
   "Executable minted sage blocks in tex buffers."
