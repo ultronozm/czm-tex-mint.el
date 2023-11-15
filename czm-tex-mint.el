@@ -131,71 +131,79 @@ result in a verbatim block."
   (interactive)
   (when-let ((ovl (mmm-overlay-at (point))))
     (let* ((code (buffer-substring-no-properties
-                  (overlay-start ovl) (overlay-end ovl)))
-	   (wrapped-code
-	    (if (not latex) code
-	      (let* ((code-lines (split-string code "\n"))
-		     (wrapped-code-lines
+                  (overlay-start ovl)
+                  (overlay-end ovl)))
+	          (wrapped-code
+	           (if (not latex)
+                code
+	             (let* ((code-lines (split-string code "\n"))
+		                   (wrapped-code-lines
                                         ; wrap result lines in "latex()".
                                         ; slightly hacky.
-		      (mapcar (lambda (line)
-			        (if (and
-				     (> (length line) 0)
-				     (not (string-match-p "^load*" line))
-				     (not (string-match-p "^[^=]*=\\([^=]\\|$\\)" line)))
-				    (concat "latex(" line ")")
-				  line))
-			      code-lines)))
-		(string-join wrapped-code-lines "\n"))))
-	   (result
+		                    (mapcar (lambda (line)
+			                             (if (and
+				                                 (> (length line)
+                                        0)
+				                                 (not (string-match-p "^load*" line))
+				                                 (not (string-match-p "^[^=]*=\\([^=]\\|$\\)" line)))
+				                                (concat "latex(" line ")")
+				                              line))
+			                           code-lines)))
+		              (string-join
+                 wrapped-code-lines
+                 "\n"))))
+	          (result
             (with-temp-buffer
               (insert (format "#+begin_src sage :results silent\n%s\n#+end_src" wrapped-code))
               (goto-char (point-min))
               (let ((python-indent-guess-indent-offset-verbose nil)
                     (inhibit-message t))
-	        (org-babel-execute-src-block)))))
+	               (org-babel-execute-src-block)))))
       (when czm-tex-mint--debug
         (with-current-buffer (get-buffer-create "*DebugMintedSage*")
-	  (goto-char (point-max))
-	  (insert (format-time-string "%Y-%m-%d %T.%3N\n"))
-	  (insert "code:\n"
-		  wrapped-code
-		  "\n"
-		  "result:\n"
-		  result)))
+	         (goto-char (point-max))
+	         (insert (format-time-string "\n\n%Y-%m-%d %T.%3N\n"))
+	         (insert "code:\n"
+		                wrapped-code
+		                "\n"
+		                "result:\n"
+		                result)))
       (save-excursion
-	(goto-char (overlay-end ovl))
-	(end-of-line)
-	;; if the next line is a \begin{results} or \begin{results*} block,
-	;; delete up to the matching \end{results}.
-	(when (looking-at "\n\\\\begin{results\\*?}")
-	  (let ((end (save-excursion
-		       (re-search-forward "\n\\\\end{results\\*?}")
-		       (point))))
-	    (delete-region (point) end)))
-	(newline 1)
-	(czm-tex-mint-with-auto-fold (insert "\\begin{results*}\n"))
-	(let (beg end)
-	  (if latex
-	      (progn
-		(let* ((result-lines (split-string result "\n"))
+	       (goto-char (overlay-end ovl))
+	       (end-of-line)
+	       ;; if the next line is a \begin{results} or \begin{results*} block,
+	       ;; delete up to the matching \end{results}.
+	       (when (looking-at "\n\\\\begin{results\\*?}")
+	         (let ((end (save-excursion
+		                     (re-search-forward "\n\\\\end{results\\*?}")
+		                     (point))))
+	           (delete-region (point)
+                           end)))
+	       (newline 1)
+	       (czm-tex-mint-with-auto-fold (insert "\\begin{results*}\n"))
+	       (let (beg end)
+	         (if latex
+	             (progn
+		              (let* ((result-lines (split-string result "\n"))
                        (nonempty-result-lines
-                        (seq-filter (lambda (line) (> (length line) 0))
+                        (seq-filter (lambda (line)
+                                      (> (length line)
+                                         0))
                                     result-lines)))
-		  (setq beg (point))
-		  (insert "\\begin{align*}\n")
-		  (insert (mapconcat #'identity
+		                (setq beg (point))
+		                (insert "\\begin{align*}\n")
+		                (insert (mapconcat #'identity
                                      nonempty-result-lines
                                      "\\\\ \n"))
-		  (insert "\n\\end{align*}\n")
-		  (setq end (point))))
-	    (czm-tex-mint-with-auto-fold (insert "\\begin{verbatim}\n"))
-	    (insert result)
+		                (insert "\n\\end{align*}\n")
+		                (setq end (point))))
+	           (czm-tex-mint-with-auto-fold (insert "\\begin{verbatim}\n"))
+	           (insert result)
             (newline 1)
-	    (czm-tex-mint-with-auto-fold (insert "\\end{verbatim}\n")))
-	  (czm-tex-mint-with-auto-fold (insert "\\end{results*}"))
-	  (if beg
-	      (preview-region beg end)))))))
+	           (czm-tex-mint-with-auto-fold (insert "\\end{verbatim}\n")))
+	         (czm-tex-mint-with-auto-fold (insert "\\end{results*}"))
+	         (if beg
+	             (preview-region beg end)))))))
 
 ;;;###autoload
 (defun czm-tex-mint-evaluate-latex ()
