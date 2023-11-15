@@ -39,7 +39,6 @@
 (defvar czm-tex-mint--mode-map (make-sparse-keymap)
   "Keymap for `czm-tex-mint--mode'.")
 
-;;;###autoload
 (define-minor-mode czm-tex-mint--mode
   "Minor mode for minted blocks with sage submode."
   :init-value nil
@@ -122,6 +121,29 @@ position after evaluating BODY."
 (defvar czm-tex-mint--debug nil
   "If non-nil, print debug information to *DebugMintedSage* buffer.")
 
+(defun czm-tex-mint--add-top-level-newlines (result-lines)
+  "Add newlines to RESULT-LINES and concatenate.
+Helper functions for `czm-tex-mint-evaluate'.  RESULT-LINES
+should be a list of strings consisting of tex code.  This
+function appends tex newlines to the strings that occur at
+top-most level; we check this last condition, crudely, by
+counting occurrences of \\left and \\right.  We then return the
+concatenation of the strings."
+  (let ((result '())
+        (open 0)
+        (len (length result-lines))
+        (i 1))
+    (dolist (line result-lines)
+      (setq open (+ open (s-count-matches "\\\\left" line)
+                    (- (s-count-matches "\\\\right" line))))
+      (push (if (and open (zerop open) (< i len))
+                (concat line " \\\\")
+              line)
+            result)
+      (setq i (1+ i)))
+    (mapconcat #'identity (nreverse result)
+               "\n")))
+
 ;;;###autoload
 (cl-defun czm-tex-mint-evaluate (&key latex)
   "Evaluate the current minted sage code block.
@@ -192,9 +214,8 @@ result in a verbatim block."
                                     result-lines)))
 		                (setq beg (point))
 		                (insert "\\begin{align*}\n")
-		                (insert (mapconcat #'identity
-                                     nonempty-result-lines
-                                     "\\\\ \n"))
+		                (insert
+                   (czm-tex-mint--add-top-level-newlines nonempty-result-lines))
 		                (insert "\n\\end{align*}\n")
 		                (setq end (point))))
 	           (czm-tex-mint-with-auto-fold (insert "\\begin{verbatim}\n"))
