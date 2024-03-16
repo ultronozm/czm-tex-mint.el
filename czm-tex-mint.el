@@ -5,7 +5,7 @@
 ;; Author: Paul D. Nelson <nelson.paul.david@gmail.com>
 ;; Version: 0.0
 ;; URL: https://github.com/ultronozm/czm-tex-mint.el
-;; Package-Requires: ((emacs "26.1") (mmm-mode "0.5.9") (sage-shell-mode "0.3") (auctex "11.86.1") (ob-sagemath "0.4"))
+;; Package-Requires: ((emacs "26.1") (mmm-mode "0.5.9") (sage-shell-mode "0.3") (auctex) (ob-sagemath "0.4"))
 ;; Keywords: tex, tools, convenience
 
 ;; This program is free software; you can redistribute it and/or modify
