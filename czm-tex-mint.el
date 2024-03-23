@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023  Paul D. Nelson
 
 ;; Author: Paul D. Nelson <nelson.paul.david@gmail.com>
-;; Version: 0.0
+;; Version: 0.1
 ;; URL: https://github.com/ultronozm/czm-tex-mint.el
 ;; Package-Requires: ((emacs "26.1") (mmm-mode "0.5.9") (sage-shell-mode "0.3") (auctex) (ob-sagemath "0.4"))
 ;; Keywords: tex, tools, convenience
@@ -36,17 +36,18 @@
 (require 'tex-fold)
 (require 'ob-sagemath)
 
-(defvar czm-tex-mint--mode-map (make-sparse-keymap)
-  "Keymap for `czm-tex-mint--mode'.")
+(defvar czm-tex-mint-mode-map (make-sparse-keymap)
+  "Keymap for `czm-tex-mint-mode'.")
 
-(define-minor-mode czm-tex-mint--mode
-  "Minor mode for minted blocks with sage submode."
+(define-minor-mode czm-tex-mint-mode
+  "Minor mode for minted blocks with sage submode.
+This is not intended to be activated manually."
   :init-value nil
   :lighter " MS"
-  :keymap czm-tex-mint--mode-map)
+  :keymap czm-tex-mint-mode-map)
 
-(defun czm-tex-mint--initialize ()
-  "Initialize `czm-tex-mint--mode'.
+(defun czm-tex-mint-initialize ()
+  "Initialize `czm-tex-mint-mode'.
 Define the `latex-minted-sage' class and add it to `latex-mode'."
   (mmm-add-classes
    '((latex-minted-sage
@@ -56,18 +57,20 @@ Define the `latex-minted-sage' class and add it to `latex-mode'."
       :back "\\\\end{minted}"
       :save-matches 1
       :insert ((?s sagecode nil @ "\\begin{minted}{sage}" @ "\n" _ "\n" @ "\\end{minted}" @))
-      :submode-hook (lambda () (czm-tex-mint--mode 1)))))
+      :submode-hook (lambda () (czm-tex-mint-mode 1)))))
   ;; (mmm-add-mode-ext-class 'latex-mode "\\.tex\\'" 'latex-minted-sage)
-  (mmm-add-mode-ext-class 'latex-mode nil 'latex-minted-sage))
+  (mmm-add-mode-ext-class 'latex-mode nil 'latex-minted-sage)
+  ;; AUCTeX 13.3+:
+  (mmm-add-mode-ext-class 'LaTeX-mode nil 'latex-minted-sage))
 
-(defun czm-tex-mint--enable ()
-  "Enable `czm-tex-mint--mode' in the current buffer."
+(defun czm-tex-mint-enable ()
+  "Enable `czm-tex-mint-mode' in the current buffer."
   (setq-local indent-line-function #'czm-tex-mint--indent-line-narrowed)
-  (czm-tex-mint--mode 1))
+  (czm-tex-mint-mode 1))
 
-(defun czm-tex-mint--disable ()
-  "Disable `czm-tex-mint--mode' in the current buffer."
-  (czm-tex-mint--mode 0))
+(defun czm-tex-mint-disable ()
+  "Disable `czm-tex-mint-mode' in the current buffer."
+  (czm-tex-mint-mode 0))
 
 (defun czm-tex-mint--indent-line-narrowed ()
   "An indent function which works on some modes where `mmm-indent-line' doesn't.
