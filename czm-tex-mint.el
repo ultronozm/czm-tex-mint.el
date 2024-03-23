@@ -48,7 +48,7 @@ This is not intended to be activated manually."
 
 (defun czm-tex-mint-initialize ()
   "Initialize `czm-tex-mint-mode'.
-Define the `latex-minted-sage' class and add it to `latex-mode'."
+Define the `latex-minted-sage' class and add it to `LaTeX-mode'."
   (mmm-add-classes
    '((latex-minted-sage
       :submode sage-shell:sage-mode
@@ -92,12 +92,6 @@ appease modes which rely on constructs like (point-min) to indent."
         (save-restriction
           (narrow-to-region (overlay-start mmm-current-overlay)
                             (overlay-end mmm-current-overlay))
-	         (save-excursion
-	           ;; no idea why this works, but it does
-	           ;; (goto-char (point-min))
-	           ;; (newline 1)
-	           ;; (backward-delete-char 1)
-	           )
           (funcall indent-function))
       (funcall indent-function))))
 
