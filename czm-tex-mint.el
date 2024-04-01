@@ -56,8 +56,7 @@ Define the `latex-minted-sage' class and add it to `LaTeX-mode'."
       :front "\\\\begin{minted}{sage}"
       :back "\\\\end{minted}"
       :save-matches 1
-      :insert ((?s sagecode nil @ "\\begin{minted}{sage}" @ "\n" _ "\n" @ "\\end{minted}" @))
-      :submode-hook (lambda () (czm-tex-mint-mode 1)))))
+      :insert ((?s sagecode nil @ "\\begin{minted}{sage}" @ "\n" _ "\n" @ "\\end{minted}" @)))))
   ;; (mmm-add-mode-ext-class 'latex-mode "\\.tex\\'" 'latex-minted-sage)
   (mmm-add-mode-ext-class 'latex-mode nil 'latex-minted-sage)
   ;; AUCTeX 13.3+:
