@@ -111,6 +111,7 @@ region between the initial position of point and the final
 position after evaluating BODY."
   `(let ((pos (point)))
      ,@body
+     (mmm-update-submode-region)
      (when czm-tex-mint-auto-fold-results
        (TeX-fold-region pos (point)))))
 
@@ -174,6 +175,7 @@ result in a verbatim block."
             (with-temp-buffer
               (insert (format "#+begin_src sage :results silent\n%s\n#+end_src" wrapped-code))
               (goto-char (point-min))
+              (org-mode)
               (let ((python-indent-guess-indent-offset-verbose nil)
                     (inhibit-message t))
 	               (org-babel-execute-src-block)))))
